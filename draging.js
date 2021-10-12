@@ -1,30 +1,51 @@
 export default function draging(Vue) {
-    let moveDom
-    let getDom
-    let changeDom
-    let nodeList
     Vue.directive('draging', {
+        bind(el) {
+            el.drag = true
+        },
         inserted(el) {
-            nodeList = [...el.parentNode.childNodes]
-            moveDom = el.cloneNode(true)
-            console.log(moveDom)
-            el.addEventListener('mousedown', () => {
-                console.log(nodeList.indexOf(el))
-                document.body.addEventListener('mousemove', (e) => {
-                    var _x = e.clientX;
-                    var _y = e.clientY;
-                    if (nodeList.indexOf(changeDom) > -1) {
-                        getDom = document.elementFromPoint(_x, _y)
-                        changeDom = getDom.cloneNode(true)
-                    }
-                })
-                document.body.addEventListener('mouseup',()=>{
-                    document.body.removeEventListener('mousemove')
-                    console.log(el == changeDom)
-                })
-            })
-
+            pcUse(el)
         }
     })
 }
 
+function pcUse(el) {
+    let bold = createElement()
+    let clientX
+    let clientY
+    let changeDom
+    let moveDom
+    el.addEventListener('mousedown', () => {
+        moveDom = el
+        document.body.appendChild(bold)
+        bold.addEventListener('mousemove', (e) => {
+            clientX = e.clientX
+            clientY = e.clientY
+            bold.style.display = 'none'
+            changeDom = document.elementFromPoint(clientX, clientY)
+            if (changeDom.drag === true) {
+                let changeParent = changeDom.parentNode
+                let moveParent = moveDom.parentNode
+                changeParent.insertBefore(moveDom, changeDom)
+                moveParent.insertBefore(changeDom, moveDom)
+            }
+            bold.style.display = 'block'
+        })
+        bold.addEventListener('mouseup', () => {
+            if ([...document.body.childNodes].indexOf(bold) > -1) {
+                document.body.removeChild(bold)
+            }
+
+        })
+    })
+}
+
+function createElement() {
+    let element = document.createElement('div')
+    element.style.width = '100vw'
+    element.style.height = '100vh'
+    element.style.position = 'absolute'
+    element.style.top = '0'
+    element.style.left = '0'
+    return element
+}
